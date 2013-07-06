@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC
+					"-//W3C//DTD HTML 4.01//EN"
+					"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Schism/JS tests</title>
+		<style type="text/css">
+
+			body
+			{
+			}
+
+		</style>
+		<script type="text/javascript" src="Picoparsec.js">
+		</script>
+		<script type="text/javascript" src="Schism.js">
+		</script>
+		<script type="text/javascript">
+			function test()
+			{
+				SchismInterpreter.init();
+
+				var rq = new XMLHttpRequest();
+			
+				rq.open('GET', 'schism-stdlib.scm', false);
+			
+				rq.send();
+			
+				SchismInterpreter.execute(rq.responseText);
+
+				rq = new XMLHttpRequest();
+				
+				rq.open('GET', 'schism-tests.scm', false);
+				
+				rq.send();
+				
+				try
+				{
+					var res = SchismInterpreter.execute(rq.responseText);
+
+					document.write(res.length + ' tests.<br>');
+
+					for (var ix = 0; ix != res.length; ++ix)
+					{
+						document.write('Test passed.<br>');
+					}
+				}
+				catch (e)
+				{
+					console.dir(e);
+
+					document.write('ERROR.<br>' + e.toString());
+				}
+			}
+		</script>
+	</head>
+	<body onLoad="test();">
+		<div>
+		</div>
+	</body>
+</html>

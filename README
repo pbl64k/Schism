@@ -1,0 +1,415 @@
+Schism is a small, embedded, Scheme-like Lisp. Schism is strongly,
+dynamically typed, uses lexical scoping, evaluates eagerly and tends to avoid
+side effects. It's a LISP-1. The two extant implementations (both to be found
+here) are interpreters.
+
+Schism has been designed to implement small pieces of business logic that
+need to be available and in-sync both client-side and server-side.
+
+Ideologically, Schism is unashamedly functional, expression-based, and
+largely single-assignment. Being a DSL, it does not have an I/O system. There
+are no constructs for imperative programming, nor any support for
+object-oriented programming. JavaScript-style object-based system would be
+easy to implement on top of it, however.
+
+Schism is Scheme-like, but it's not a Scheme. It's not a recursive acronym
+either.
+
+DIFFERENCES FROM SCHEME
+
+1. Perhaps most conspicuously, Schism doesn't have macros of any sort, nor
+   any other facilities to operate on its own AST. In fact, the internal
+   representation is incompatible with Schism's lists, so as it is, Schism
+   is not homoiconic.
+
+2. Schism doesn't have quoting or quasiquoting.
+
+3. Schism does not perform tail call elimination.
+
+4. Schism doesn't have first-class continuations (call/cc in particular).
+
+5. Schism's type system is simpler than Scheme's. Schism has six primitive
+   types: boolean, numeric (aka number - and there's no numeric tower at
+   all), string (a char is just a string that has length one), nil (aka
+   empty or null), pair (a cons cell) and lambda (aka procedure). There's no
+   support for vectors. Schism doesn't have symbols as first-class
+   citizens, nor does it have anything like ports.
+
+6. Schism only has seven special forms: lambda, define, letrec, if, cond,
+   and & or.
+
+7. Schism doesn't have named let or lambda forms. Use define, letrec or fix
+   instead.
+
+8. All values are immutable. Limited destructive assignment is supported
+   (or rather, being treated as a lesser evil) at top level through the use
+   of define. set! and its ilk are not included.
+
+9. Schism doesn't support variadic functions, whether named or anonymous.
+   Host functions exposed through the environment may be variadic.
+
+10. Schism lacks many standard library functions, has no
+    equality/equivalence hierarchy, doesn't have literals #t and #f, and
+	does not support dot syntax for improper lists.
+
+CAVEATS
+
+1. Schism hasn't been designed for performance. It shows. Both
+   implementations are interpreters running on top of interpreters. Parser
+   library was chosen for familiarity and simplicity rather than
+   performance. In particular, the PHP version is atrociously slow at parse
+   stage. In production it is essential to cache parsed ASTs to avoid the
+   overhead. It should be easy enough to plug in an alternate parser if one
+   so desires. Additionally, the handling of environments is highly
+   inefficient, which is going to show on anything but the small,
+   straightforward pieces of business logic it's designed to run. There's
+   no static validation - most of it happens at run-time, which further
+   affects performance. Schism is subject to host platforms limits on stack
+   depth, which doesn't work well in absence of TCO.
+
+2. Diagnostics are extremely limited. Well, pretty much non-existent.
+   Starting with the fact that line/character information is not preserved
+   by the parser, and ending with the general observation that run-time
+   errors are not very informative.
+
+3. The parser is not very robust and at times idiosyncratic. (For example,
+   while the parser is generally lenient on whitespace, the names of
+   special forms must be followed by at least one whitespace character,
+   otherwise the parser, being largely non-backtracking, would be unable to
+   accept "orientation" as a valid symbol.) Numeric literals interfere with
+   naming identifiers - you cannot define 1+ in current Schism
+   implementations. Other quirks that I'm not aware of might very well be
+   present.
+
+4. While Schism is supposed to have the same evaluation semantics in both
+   implementations, there might be differences in practice. Math is not
+   isolated enough from the underlying platform to guarantee exact same
+   behavior. Furthermore, Schism is not mature enough to guarantee there
+   are no overlooked differences between the two implementations.
+
+LANGUAGE "REFERENCE"
+
+1. Special forms
+
+(comment EXPR ...)
+
+(lambda [] EXPR-BODY)
+(lambda [ARG1 ...] EXPR-BODY)
+
+(define NAME EXPR-VAL)
+(define [NAME] EXPR-BODY)
+(define [NAME ARG1 ...] EXPR-BODY)
+
+(letrec ([NAME EXPR-VAL] ...) EXPR-VAL)
+
+(if EXPR-PRED EXPR-VAL EXPR-VAL)
+
+(cond [EXPR-PRED EXPR-VAL] ...)
+
+(and )
+(and EXPR1 ...)
+
+(or )
+(or EXPR1 ...)
+
+2. Primitive functions (and values)
+
+true
+false
+nil
+
+(sys\raise-error STR)
+
+(boolean? ANY)
+(numeric? ANY)
+(string? ANY)
+(procedure? ANY)
+(nil? ANY)
+(cons? ANY)
+
+(equal? ANY)
+
+(repr ANY)
+
+(not BOOL)
+
+(+)
+(+ NUM1 ...)
+(- NUM)
+(- NUM1 NUM2)
+(*)
+(* NUM1 ...)
+(/ NUM)
+(/ NUM1 NUM2)
+
+(< NUM1 NUM2)
+(<= NUM1 NUM2)
+(= NUM1 NUM2)
+(/= NUM1 NUM2)
+(> NUM1 NUM2)
+(>= NUM1 NUM2)
+
+(floor NUM)
+(ceiling NUM)
+(round NUM)
+
+(expt NUM1 NUM2)
+(sin NUM)
+(cos NUM)
+(tan NUM)
+(asin NUM)
+(acos NUM)
+(atan NUM)
+(log NUM)
+
+(number->string NUM)
+(integer->string NUM)
+
+(string<? STR1 STR2)
+(string-ci<? STR1 STR2)
+(string<=? STR1 STR2)
+(string-ci<=? STR1 STR2)
+(string=? STR1 STR2)
+(string-ci=? STR1 STR2)
+(string/=? STR1 STR2)
+(string-ci/=? STR1 STR2)
+(string>? STR1 STR2)
+(string-ci>? STR1 STR2)
+(string>=? STR1 STR2)
+(string-ci>=? STR1 STR2)
+
+(string->number STR)
+(string->integer STR)
+
+(string-length STR)
+(string-append)
+(string-append STR1 ...)
+(substring STR NUM1 NUM2)
+
+(cons ANY1 ANY2)
+(car CONS)
+(cdr CONS)
+(list)
+(list ANY1 ...)
+
+3. Library functions (and values)
+
+PI
+E
+empty
+UPPERCASE-LETTER-CHARACTERS
+LOWERCASE-LETTER-CHARACTERS
+LOWER-TO-UPPER-LETTER-MAPPING
+UPPER-TO-LOWER-LETETR-MAPPING
+LETTER-CHARACTERS
+NUMERIC-CHARACTERS
+WHITESPACE-CHARACTERS
+
+(assert BOOL)
+(assert-equals ANY1 ANY2)
+
+(empty? ANY)
+(null? ANY)
+
+empty? and null? are aliases of nil?
+
+(pair? ANY)
+
+pair? is an alias of cons?
+
+(list? ANY)
+
+(lambda? ANY)
+
+lambda? is an alias of procedure
+
+(eq? ANY1 ANY2)
+(eqv? ANY1 ANY2)
+
+eq? and eqv? are aliases of equal?
+
+(number? ANY)
+
+number? is an alias of numeric?
+
+(== NUM1 NUM2)
+
+== is an alias of =
+
+(!= NUM1 NUM2)
+
+!= is an alias of /=
+
+(zero? NUM)
+(positive? NUM)
+(negative? NUM)
+
+(abs NUM)
+(sign NUM)
+
+(max NUM1 NUM2)
+(min NUM1 NUM2)
+
+(truncate NUM)
+
+(quotient NUM1 NUM2)
+(remainder NUM1 NUM2)
+(floored-quotient NUM1 NUM2)
+(modulo NUM1 NUM2)
+
+(gcd NUM1 NUM2)
+(lcm NUM1 NUM2)
+
+(sqrt NUM)
+
+(even? NUM)
+(odd? NUM)
+
+(exp NUM)
+
+(succ NUM)
+(pred NUM)
+
+(char? ANY)
+
+(char<? CHAR1 CHAR2)
+(char-ci<? CHAR1 CHAR2)
+(char<=? CHAR1 CHAR2)
+(char-ci<=? CHAR1 CHAR2)
+(char=? CHAR1 CHAR2)
+(char-ci=? CHAR1 CHAR2)
+(char/=? CHAR1 CHAR2)
+(char-ci/=? CHAR1 CHAR2)
+(char>? CHAR1 CHAR2)
+(char-ci>? CHAR1 CHAR2)
+(char>=? CHAR1 CHAR2)
+(char-ci>=? CHAR1 CHAR2)
+
+(char->integer CHAR)
+
+(integer->char NUM)
+
+integer->char is an alias of integer->string
+
+(id ANY)
+(const ANY)
+(flip LAMBDA)
+(dot LAMBDA1 LAMBDA2)
+(subst LAMBDA1 LAMBDA2)
+(fix LAMBDA)
+
+(pair ANY1 ANY2)
+
+pair is an alias of cons
+
+(first CONS)
+
+first is an alias of car
+
+(rest CONS)
+
+rest is an alias of cdr
+
+(fold-left LAMBDA ANY LIST)
+(foldl LAMBDA ANY LIST)
+
+foldl is an alias of fold-left
+
+(fold-right LAMBDA ANY LIST)
+(foldr LAMBDA ANY LIST)
+
+foldr is an alias of fold-right
+
+(unfold-left LAMBDA ANY)
+(unfoldl LAMBDA ANY)
+(unfold LAMBDA ANY)
+
+unfoldl and unfold are aliases of unfold-left
+
+(map LAMBDA LIST)
+(reverse LIST)
+(join LIST)
+(bind LAMBDA LIST)
+(filter LAMBDA LIST)
+(all? LAMBDA LIST)
+(for-all? LIST LAMBDA)
+(any? LAMBDA LIST)
+(there-exists? LIST LAMBDA)
+(length LIST)
+(zip LIST1 LIST2)
+
+(member ANY LIST)
+(memq ANY LIST)
+(memv ANY LIST)
+
+memq and memv are aliases of member
+
+(element-of ANY LIST)
+
+(append LIST1 LIST2)
+
+(ith LIST NUM)
+(list-ref LIST NUM)
+
+list-ref is an alias of ith
+
+(take NUM LIST)
+(list-head LIST NUM)
+(drop NUM LIST)
+(list-tail LIST NUM)
+
+(sort-with LAMBDA LIST)
+(merge-with LAMBDA LIST1 LIST2)
+(merge-sort-with LAMBDA LIST)
+(quick-sort LIST LAMBDA)
+(merge-sort LIST LAMBDA)
+(sort LIST LAMBDA)
+
+sort is an alias of merge-sort
+
+(assoc ANY LIST)
+(assq ANY LIST)
+(assv ANY LIST)
+
+assq and assv are aliases of assoc
+
+(range-step NUM1 NUM2 NUM3)
+(range NUM1 NUM2)
+(make-list NUM1 ANY)
+
+(list->string LIST)
+(string->list STR)
+
+(string-null? STR)
+(string-ref STR NUM)
+(string-head STR NUM)
+(string-tail STR NUM)
+
+(char-alphabetic? CHAR)
+(char-numeric? CHAR)
+(char-whitespace? CHAR)
+(char-upper-case? CHAR)
+(char-lower-case? CHAR)
+
+(char-upcase CHAR)
+(char-downcase CHAR)
+
+(integrate LAMBDA LIST NUM)
+(integrate-rk LAMBDA LIST NUM)
+
+(map\has? MAP ANY)
+
+(map\elt-already-exists ANY)
+(map\elt-not-found ANY)
+
+(map\get MAP ANY)
+(map\update-without-checking MAP ANY ANY)
+(map\update MAP ANY ANY)
+(map\delete-without-checking MAP ANY)
+(map\delete MAP ANY)
+(map\insert-without-checking MAP ANY ANY)
+(map\insert MAP ANY ANY)
+(map\insert-or-update MAP ANY ANY)
+(map\keys MAP)
+(map\values MAP)
+

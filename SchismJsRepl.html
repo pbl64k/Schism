@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC
+					"-//W3C//DTD HTML 4.01//EN"
+					"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Schism/JS REPL</title>
+		<style type="text/css">
+
+			body
+			{
+			}
+
+		</style>
+		<script type="text/javascript" src="Picoparsec.js">
+		</script>
+		<script type="text/javascript" src="Schism.js">
+		</script>
+		<script type="text/javascript">
+			function init()
+			{
+				SchismInterpreter.init();
+
+				var rq = new XMLHttpRequest();
+		
+				rq.open('GET', 'schism-stdlib.scm', false);
+		
+				rq.send();
+		
+				SchismInterpreter.execute(rq.responseText);
+			}
+
+			function repl()
+			{
+				var code = document.getElementById('cli').value;
+
+				var elt = document.createElement('pre');
+				elt.innerText = code;
+				document.getElementById('output').appendChild(elt);
+				document.getElementById('output').appendChild(document.createElement('hr'));
+
+				try
+				{
+					var res = SchismInterpreter.execute(code);
+
+					for (var ix in res)
+					{
+						var elt = document.createElement('pre');
+						elt.innerText = Schism.repr(res[ix])[1];
+						document.getElementById('output').appendChild(elt);
+					}
+				}
+				catch (e)
+				{
+					var elt = document.createElement('pre');
+					elt.innerText = 'Error';
+					document.getElementById('output').appendChild(elt);
+
+					console.dir(e);
+				}
+
+				document.getElementById('output').appendChild(document.createElement('hr'));
+
+				document.getElementById('cli').value = '';
+
+				return false;
+			}
+		</script>
+	</head>
+	<body onLoad="init();">
+		<div id="output">
+		</div>
+		<div>
+			<form>
+				<textarea id="cli" rows="5" cols="137"></textarea>
+				<input type="button" value="Execute" onClick="repl();">
+			</form>
+		</div>
+	</body>
+</html>
