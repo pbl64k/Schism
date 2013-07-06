@@ -459,6 +459,18 @@
 			[y (+ init (* diff (f (car xs) init)))])
 			(cons init (integrate f (cdr xs) y)))))
 
+(define [integrate-rk f xs init]
+	(if [<= (length xs) 1]
+		(list init)
+		(letrec
+			([h (- (car (cdr xs)) (car xs))]
+			[k1 (f (car xs) init)]
+			[k2 (f (+ (car xs) (/ h 2)) (+ init (* 0.5 h k1)))]
+			[k3 (f (+ (car xs) (/ h 2)) (+ init (* 0.5 h k2)))]
+			[k4 (f (+ (car xs) h) (+ init (* h k3)))]
+			[y (+ init (* (/ 6) h (+ k1 (* 2 k2) (* 2 k3) k4)))])
+			(cons init (integrate-rk f (cdr xs) y)))))
+
 (comment "maps (lists of pairs, representing key-value associations)")
 
 (define [map\has? xs key]

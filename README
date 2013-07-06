@@ -19,6 +19,12 @@ Schism depends on Picoparsec:
 
 https://github.com/pbl64k/Picoparsec
 
+See REPL demo at:
+
+http://ranselett.net/Schism/
+
+(Works only in Chrome.)
+
 DIFFERENCES FROM SCHEME
 
 1. Perhaps most conspicuously, Schism doesn't have macros of any sort, nor
