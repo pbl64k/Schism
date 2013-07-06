@@ -15,6 +15,10 @@ easy to implement on top of it, however.
 Schism is Scheme-like, but it's not a Scheme. It's not a recursive acronym
 either.
 
+Schism depends on Picoparsec:
+
+https://github.com/pbl64k/Picoparsec
+
 DIFFERENCES FROM SCHEME
 
 1. Perhaps most conspicuously, Schism doesn't have macros of any sort, nor
