@@ -363,6 +363,8 @@ memq and memv are aliases of member
 
 list-ref is an alias of ith
 
+(last LIST)
+(init LIST)
 (take NUM LIST)
 (list-head LIST NUM)
 (drop NUM LIST)
@@ -404,8 +406,8 @@ assq and assv are aliases of assoc
 (char-upcase CHAR)
 (char-downcase CHAR)
 
-(integrate LAMBDA LIST NUM)
-(integrate-rk LAMBDA LIST NUM)
+(integrate LAMBDA LIST LIST)
+(integrate-rk LAMBDA LIST LIST)
 
 (map\has? MAP ANY)
 

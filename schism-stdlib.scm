@@ -292,6 +292,16 @@
 		[(zero? i) (car xs)]
 		[else (ith (cdr xs) (- i 1))]))
 
+(define [last xs]
+	(if [null? (cdr xs)]
+		(car xs)
+		(last (cdr xs))))
+
+(define [init xs]
+	(if [null? (cdr xs)]
+		empty
+		(cons (car xs) (init (cdr xs)))))
+
 (define list-ref ith)
 
 (define [take n xs]
@@ -456,20 +466,40 @@
 		(cons init empty)
 		(letrec
 			([diff (- (car (cdr xs)) (car xs))]
-			[y (+ init (* diff (f (car xs) init)))])
-			(cons init (integrate f (cdr xs) y)))))
+			[ys (map (lambda [i] (+ (car i) (* diff (cdr i)))) (zip init (f (car xs) init)))])
+			(cons init (integrate f (cdr xs) ys)))))
 
 (define [integrate-rk f xs init]
 	(if [<= (length xs) 1]
 		(list init)
 		(letrec
 			([h (- (car (cdr xs)) (car xs))]
+			[g
+				(lambda [init c k]
+					(map
+						(lambda [i] (+ (car i) (* c (cdr i))))
+						(zip init k)))]
 			[k1 (f (car xs) init)]
-			[k2 (f (+ (car xs) (/ h 2)) (+ init (* 0.5 h k1)))]
-			[k3 (f (+ (car xs) (/ h 2)) (+ init (* 0.5 h k2)))]
-			[k4 (f (+ (car xs) h) (+ init (* h k3)))]
-			[y (+ init (* (/ 6) h (+ k1 (* 2 k2) (* 2 k3) k4)))])
-			(cons init (integrate-rk f (cdr xs) y)))))
+			[k2 (f (+ (car xs) (/ h 2)) (g init (* 0.5 h) k1))]
+			[k3 (f (+ (car xs) (/ h 2)) (g init (* 0.5 h) k2))]
+			[k4 (f (+ (car xs) h) (g init h k3))]
+			[k
+				(map
+					(lambda [i]
+						(+ (car i) (car (cdr i)) (car (cdr (cdr i))) (cdr (cdr (cdr i)))))
+					(zip k1 (zip (map (lambda [x] (* 2 x)) k2) (zip (map (lambda [x] (* 2 x)) k3) k4))))]
+			[ys (g init (/ h 6) k)])
+			(cons init (integrate-rk f (cdr xs) ys)))))
+
+(comment "e.g.:"
+
+	"dy/dx = y, y_0 = 1"
+	(last (integrate-rk (lambda [x y] y) (range-step 0 1.00001 0.02) (list 1)))
+
+	"dy/dx = z, dz/dx = -y, y_0 = 0, z_0 = 1"
+	(last (integrate-rk (lambda [x y] (list (ith y 1) (- (ith y 0)))) (range-step 0 (/ PI 4) 0.01) (list 0 1)))
+
+)
 
 (comment "maps (lists of pairs, representing key-value associations)")
 
