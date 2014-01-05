@@ -1,6 +1,6 @@
 Schism is a small, embedded, Scheme-like Lisp. Schism is strongly,
 dynamically typed, uses lexical scoping, evaluates eagerly and tends to avoid
-side effects. It's a LISP-1. The two extant implementations (both to be found
+side effects. It's a Lisp-1. The two extant implementations (both to be found
 here) are interpreters.
 
 Schism has been designed to implement small pieces of business logic that
@@ -60,7 +60,7 @@ DIFFERENCES FROM SCHEME
 
 10. Schism lacks many standard library functions, has no
     equality/equivalence hierarchy, doesn't have literals #t and #f, and
-	does not support dot syntax for improper lists.
+    does not support dot syntax for improper lists.
 
 CAVEATS
 
@@ -69,13 +69,14 @@ CAVEATS
    library was chosen for familiarity and simplicity rather than
    performance. In particular, the PHP version is atrociously slow at parse
    stage. In production it is essential to cache parsed ASTs to avoid the
-   overhead. It should be easy enough to plug in an alternate parser if one
-   so desires. Additionally, the handling of environments is highly
-   inefficient, which is going to show on anything but the small,
-   straightforward pieces of business logic it's designed to run. There's
-   no static validation - most of it happens at run-time, which further
-   affects performance. Schism is subject to host platforms limits on stack
-   depth, which doesn't work well in absence of TCO.
+   overhead. It should be easy enough to plug in an alternate parser (e.g.,
+   a straightforward S-expression parser with some postprocessing) if one so
+   desires. Additionally, the handling of environments is highly inefficient,
+   which is going to show on anything but the small, straightforward pieces
+   of business logic it's designed to run. There's no static validation -
+   most of it happens at run-time, which further affects performance. Schism
+   is subject to host platform's limits on stack depth, which doesn't work
+   well in absence of TCO (or imperative language constructs).
 
 2. Diagnostics are extremely limited. Well, pretty much non-existent.
    Starting with the fact that line/character information is not preserved
@@ -96,6 +97,13 @@ CAVEATS
    isolated enough from the underlying platform to guarantee exact same
    behavior. Furthermore, Schism is not mature enough to guarantee there
    are no overlooked differences between the two implementations.
+
+You may want to check out the standard library and test suite
+(schism-stdlib.scm and schism-tests.scm correspondingly) for code samples.
+
+The best use I've found for Schism so far is as a replacement for a
+programmable calculator (as Schism/JS REPL works just fine in Android
+Chrome).
 
 LANGUAGE "REFERENCE"
 
